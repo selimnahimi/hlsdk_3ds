@@ -185,6 +185,8 @@ void monster_alien_slave( entvars_t *pev );
 void monster_vortigaunt( entvars_t *pev );
 void world_items( entvars_t *pev );
 void item_suit( entvars_t *pev );
+void item_armorvest( entvars_t *pev );
+void item_helmet( entvars_t *pev );
 void item_battery( entvars_t *pev );
 void item_antidote( entvars_t *pev );
 void item_security( entvars_t *pev );
@@ -252,6 +254,7 @@ void rpg_rocket( entvars_t *pev );
 void ammo_rpgclip( entvars_t *pev );
 void monster_satchel( entvars_t *pev );
 void weapon_satchel( entvars_t *pev );
+void monster_rosenberg( entvars_t *pev );
 void monster_scientist( entvars_t *pev );
 void monster_scientist_dead( entvars_t *pev );
 void monster_sitting_scientist( entvars_t *pev );
@@ -447,6 +450,8 @@ dllexport_t ctr_server_exports[] = {
 	{ "monster_vortigaunt", (void*)monster_vortigaunt },
 	{ "world_items", (void*)world_items },
 	{ "item_suit", (void*)item_suit },
+	{ "item_armorvest", (void*)item_armorvest },
+	{ "item_helmet", (void*)item_helmet },
 	{ "item_battery", (void*)item_battery },
 	{ "item_antidote", (void*)item_antidote },
 	{ "item_security", (void*)item_security },
@@ -514,6 +519,7 @@ dllexport_t ctr_server_exports[] = {
 	{ "ammo_rpgclip", (void*)ammo_rpgclip },
 	{ "monster_satchel", (void*)monster_satchel },
 	{ "weapon_satchel", (void*)weapon_satchel },
+	{ "monster_rosenberg", (void*)monster_rosenberg },
 	{ "monster_scientist", (void*)monster_scientist },
 	{ "monster_scientist_dead", (void*)monster_scientist_dead },
 	{ "monster_sitting_scientist", (void*)monster_sitting_scientist },
@@ -580,6 +586,7 @@ dllexport_t ctr_server_exports[] = {
 	{ "xen_spore_large", (void*)xen_spore_large },
 	{ "xen_hull", (void*)xen_hull },
 	{ "monster_zombie", (void*)monster_zombie },
+	
 	{ NULL, NULL },
 };
 
