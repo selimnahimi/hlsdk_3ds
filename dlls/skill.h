@@ -136,6 +136,93 @@ struct skilldata_t
 	float plrStomach;
 	float plrLeg;
 	float plrArm;
+
+	// Monster Health & Damage
+	float otisHealth;
+
+	float pitdroneHealth;
+	float pitdroneDmgBite;
+	float pitdroneDmgWhip;
+	float pitdroneDmgSpit;
+
+	float fgruntHealth;
+	float fgruntDmgKick;
+	float fgruntShotgunPellets;
+	float fgruntGrenadeSpeed;
+
+	float medicHealth;
+	float medicDmgKick;
+	float medicGrenadeSpeed;
+	float medicHeal;
+
+	float torchHealth;
+	float torchDmgKick;
+	float torchGrenadeSpeed;
+
+	float massnHealth;
+	float massnDmgKick;
+	float massnGrenadeSpeed;
+
+	float strooperHealth;
+	float strooperDmgKick;
+	float strooperGrenadeSpeed;
+	float strooperMaxCharge;
+	float strooperRchgSpeed;
+
+	float cleansuitScientistHealth;
+	float cleansuitScientistHeal;
+
+	float voltigoreHealth;
+	float voltigoreDmgPunch;
+	float voltigoreDmgBeam;
+
+	float babyVoltigoreHealth;
+	float babyVoltigoreDmgPunch;
+
+	float pwormHealth;
+	float pwormDmgSwipe;
+	float pwormDmgBeam;
+
+	float gwormHealth;
+	float gwormDmgSpit;
+	float gwormDmgHit;
+
+	float zbarneyHealth;
+	float zbarneyDmgOneSlash;
+	float zbarneyDmgBothSlash;
+
+	float zgruntHealth;
+	float zgruntDmgOneSlash;
+	float zgruntDmgBothSlash;
+
+	float gonomeHealth;
+	float gonomeDmgOneSlash;
+	float gonomeDmgGuts;
+	float gonomeDmgOneBite;
+
+	float sroachHealth;
+	float sroachDmgBite;
+	float sroachLifespan;
+
+	// Player Weapons
+	float plrDmgPWrench;
+	float plrDmgKnife;
+	float plrDmgGrapple;
+	float plrDmgEagle;
+	float plrDmgDisplacer;
+	float plrDisplacerRadius;
+	float plrDmgShockroachSingleplayer;
+	float plrDmgSpore;
+	float plrDmg762;
+	float plrDmg556;
+
+	// weapons shared by monsters
+	float monDmg762;
+	float monDmg556;
+	float monDmgDisplacer;
+	float plrDmgShockroachMultiplayer;
+
+	float displacerDmgRadius;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

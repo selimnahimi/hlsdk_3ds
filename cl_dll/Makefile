@@ -1,4 +1,15 @@
-SRCS=../dlls/crossbow.cpp
+SRCS=gearbox/hud_nightvision.cpp
+SRCS+=../dlls/gearbox/displacer.cpp
+SRCS+=../dlls/gearbox/knife.cpp
+SRCS+=../dlls/gearbox/eagle.cpp
+SRCS+=../dlls/gearbox/grapple.cpp
+SRCS+=../dlls/gearbox/m249.cpp
+SRCS+=../dlls/gearbox/penguin.cpp
+SRCS+=../dlls/gearbox/pipewrench.cpp
+SRCS+=../dlls/gearbox/shockrifle.cpp
+SRCS+=../dlls/gearbox/sniperrifle.cpp
+SRCS+=../dlls/gearbox/sporelauncher.cpp
+SRCS+=../dlls/crossbow.cpp
 SRCS+=../dlls/crowbar.cpp
 SRCS+=../dlls/egon.cpp
 SRCS+=./ev_hldm.cpp
@@ -73,7 +84,7 @@ CC        = $(PREFIX)-gcc
 CXX       = $(PREFIX)-g++
 AR        = $(PREFIX)-ar
 
-INCLUDES = -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../utils/false_vgui/include -include "classhacks.h"
+INCLUDES = -I../common -I. -I../game_shared -I../pm_shared -I../dlls/gearbox -I../engine -I../dlls -I../utils/false_vgui/include -include "classhacks.h"
 DEFINES = -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -D_3DS
 CFLAGS =  -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -Wl,-q -Wfatal-errors -Wno-write-strings -fsigned-char -fno-short-enums  $(DEFINES) $(INCLUDES)
 CXXFLAGS = $(CFLAGS) -fno-exceptions -std=c++11 -fpermissive -static-libstdc++ -static-libgcc
