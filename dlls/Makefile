@@ -112,12 +112,9 @@ OBJS = \
 	gearbox/displacer.o \
 	gearbox/drillsergeant.o \
 	gearbox/eagle.o \
-#	gearbox/fgrunt_medic.o \
-#	gearbox/fgrunt_torch.o \
 	gearbox/fgrunt.o \
 	gearbox/func_tank_of.o \
 	gearbox/gearbox_effects.o \
-	gearbox/gearbox_subs.o \
 	gearbox/gearbox_triggers.o \
 	gearbox/gearbox_utils.o \
 	gearbox/generic_items.o \

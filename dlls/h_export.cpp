@@ -69,6 +69,7 @@ extern "C"
 int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 int Server_GetPhysicsInterface( int iVersion, server_physics_api_t *pfuncsFromEngine, physics_interface_t *pFunctionTable );
+
 void monster_flyer( entvars_t *pev );
 void monster_flyer_flock( entvars_t *pev );
 void monster_alien_grunt( entvars_t *pev );
@@ -234,6 +235,7 @@ void func_traincontrols( entvars_t *pev );
 void func_trackchange( entvars_t *pev );
 void func_trackautochange( entvars_t *pev );
 void func_guntarget( entvars_t *pev );
+void env_spritetrain( entvars_t *pev );
 void player( entvars_t *pev );
 void monster_hevsuit_dead( entvars_t *pev );
 void player_weaponstrip( entvars_t *pev );
@@ -318,6 +320,100 @@ void xen_spore_medium( entvars_t *pev );
 void xen_spore_large( entvars_t *pev );
 void xen_hull( entvars_t *pev );
 void monster_zombie( entvars_t *pev );
+void monster_blkop_apache( entvars_t *pev );
+void monster_blkop_osprey( entvars_t *pev );
+void monster_cleansuit_scientist( entvars_t *pev );
+void monster_cleansuit_scientist_dead( entvars_t *pev );
+void monster_sitting_cleansuit_scientist( entvars_t *pev );
+void item_flag_team1( entvars_t *pev );
+void item_flag_team2( entvars_t *pev );
+void carried_flag_team1( entvars_t *pev );
+void carried_flag_team2( entvars_t *pev );
+void info_ctfspawn_powerup( entvars_t *pev );
+void item_ctfaccelerator( entvars_t *pev );
+void item_ctfbackpack( entvars_t *pev );
+void item_ctflongjump( entvars_t *pev );
+void item_ctfportablehev( entvars_t *pev );
+void item_ctfregeneration( entvars_t *pev );
+void info_displacer_xen_target( entvars_t *pev );
+void info_displacer_earth_target( entvars_t *pev );
+void displacer_ball( entvars_t *pev );
+void weapon_displacer( entvars_t *pev );
+void monster_drillsergeant( entvars_t *pev );
+void weapon_eagle( entvars_t *pev );
+void eagle_laser( entvars_t *pev );
+void monster_human_grunt_ally( entvars_t *pev );
+void monster_grunt_ally_repel( entvars_t *pev );
+void monster_medic_ally_repel( entvars_t *pev );
+void monster_torch_ally_repel( entvars_t *pev );
+void monster_human_grunt_ally_dead( entvars_t *pev );
+void monster_human_torch_ally( entvars_t *pev );
+void monster_human_medic_ally( entvars_t *pev );
+void func_tank_of( entvars_t *pev );
+void func_tanklaser_of( entvars_t *pev );
+void func_tankrocket_of( entvars_t *pev );
+void func_tankmortar_of( entvars_t *pev );
+void func_tankcontrols_of( entvars_t *pev );
+void pitworm_gib( entvars_t *pev );
+void pitworm_gibshooter( entvars_t *pev );
+void env_blowercannon( entvars_t *pev );
+void trigger_xen_return( entvars_t *pev );
+void trigger_geneworm_hit( entvars_t *pev );
+void trigger_playerfreeze( entvars_t *pev );
+void item_generic( entvars_t *pev );
+void env_genewormcloud( entvars_t *pev );
+void env_genewormspawn( entvars_t *pev );
+void monster_geneworm( entvars_t *pev );
+void monster_gonome( entvars_t *pev );
+void monster_gonome_dead( entvars_t *pev );
+void weapon_grapple( entvars_t *pev );
+void grapple_tip( entvars_t *pev );
+void monster_houndeye_dead( entvars_t *pev );
+void monster_alien_slave_dead( entvars_t *pev );
+void weapon_knife( entvars_t *pev );
+void monster_op4loader( entvars_t *pev );
+void weapon_m249( entvars_t *pev );
+void ammo_556( entvars_t *pev );
+void monster_male_assassin( entvars_t *pev );
+void monster_assassin_repel( entvars_t *pev );
+void monster_massassin_dead( entvars_t *pev );
+void item_nuclearbombtimer( entvars_t *pev );
+void item_nuclearbombbutton( entvars_t *pev );
+void item_nuclearbomb( entvars_t *pev );
+//void mortar_shell( entvars_t *pev );
+//void op4mortar( entvars_t *pev );
+//void func_op4mortarcontroller( entvars_t *pev );
+void monster_otis( entvars_t *pev );
+void monster_otis_dead( entvars_t *pev );
+void monster_penguin( entvars_t *pev );
+void weapon_penguin( entvars_t *pev );
+void weapon_pipewrench( entvars_t *pev );
+void pitdronespike( entvars_t *pev );
+void monster_pitdrone( entvars_t *pev );
+void monster_pitworm( entvars_t *pev );
+void monster_pitworm_up( entvars_t *pev );
+void info_pitworm_steam_lock( entvars_t *pev );
+void monster_recruit( entvars_t *pev );
+void env_rope( entvars_t *pev );
+void rope_sample( entvars_t *pev );
+void rope_segment( entvars_t *pev );
+void env_electrified_wire( entvars_t *pev );
+void shock_beam( entvars_t *pev );
+void weapon_shockrifle( entvars_t *pev );
+void monster_shockroach( entvars_t *pev );
+void monster_skeleton_dead( entvars_t *pev );
+void weapon_sniperrifle( entvars_t *pev );
+void ammo_762( entvars_t *pev );
+void spore( entvars_t *pev );
+void weapon_sporelauncher( entvars_t *pev );
+void ammo_spore( entvars_t *pev );
+void monster_shocktrooper( entvars_t *pev );
+void voltigore_energy_ball( entvars_t *pev );
+void monster_alien_voltigore( entvars_t *pev );
+void monster_alien_babyvoltigore( entvars_t *pev );
+void monster_zombie_barney( entvars_t *pev );
+void monster_zombie_soldier( entvars_t *pev );
+void monster_zombie_soldier_dead( entvars_t *pev );
 
 typedef struct dllexport_s
 {
@@ -330,7 +426,7 @@ dllexport_t ctr_server_exports[] = {
 	{ "GetEntityAPI", (void*)GetEntityAPI },
 	{ "GetEntityAPI2", (void*)GetEntityAPI2 },
 	{ "Server_GetPhysicsInterface", (void*)Server_GetPhysicsInterface },
-// entity exports, generated by genexports.py
+// entity exports, generated by extract_entity.bat
 	{ "monster_flyer", (void*)monster_flyer },
 	{ "monster_flyer_flock", (void*)monster_flyer_flock },
 	{ "monster_alien_grunt", (void*)monster_alien_grunt },
@@ -496,6 +592,7 @@ dllexport_t ctr_server_exports[] = {
 	{ "func_trackchange", (void*)func_trackchange },
 	{ "func_trackautochange", (void*)func_trackautochange },
 	{ "func_guntarget", (void*)func_guntarget },
+	{ "env_spritetrain", (void*)env_spritetrain },
 	{ "player", (void*)player },
 	{ "monster_hevsuit_dead", (void*)monster_hevsuit_dead },
 	{ "player_weaponstrip", (void*)player_weaponstrip },
@@ -580,6 +677,100 @@ dllexport_t ctr_server_exports[] = {
 	{ "xen_spore_large", (void*)xen_spore_large },
 	{ "xen_hull", (void*)xen_hull },
 	{ "monster_zombie", (void*)monster_zombie },
+	{ "monster_blkop_apache", (void*)monster_blkop_apache },
+	{ "monster_blkop_osprey", (void*)monster_blkop_osprey },
+	{ "monster_cleansuit_scientist", (void*)monster_cleansuit_scientist },
+	{ "monster_cleansuit_scientist_dead", (void*)monster_cleansuit_scientist_dead },
+	{ "monster_sitting_cleansuit_scientist", (void*)monster_sitting_cleansuit_scientist },
+	{ "item_flag_team1", (void*)item_flag_team1 },
+	{ "item_flag_team2", (void*)item_flag_team2 },
+	{ "carried_flag_team1", (void*)carried_flag_team1 },
+	{ "carried_flag_team2", (void*)carried_flag_team2 },
+	{ "info_ctfspawn_powerup", (void*)info_ctfspawn_powerup },
+	{ "item_ctfaccelerator", (void*)item_ctfaccelerator },
+	{ "item_ctfbackpack", (void*)item_ctfbackpack },
+	{ "item_ctflongjump", (void*)item_ctflongjump },
+	{ "item_ctfportablehev", (void*)item_ctfportablehev },
+	{ "item_ctfregeneration", (void*)item_ctfregeneration },
+	{ "info_displacer_xen_target", (void*)info_displacer_xen_target },
+	{ "info_displacer_earth_target", (void*)info_displacer_earth_target },
+	{ "displacer_ball", (void*)displacer_ball },
+	{ "weapon_displacer", (void*)weapon_displacer },
+	{ "monster_drillsergeant", (void*)monster_drillsergeant },
+	{ "weapon_eagle", (void*)weapon_eagle },
+	{ "eagle_laser", (void*)eagle_laser },
+	{ "monster_human_grunt_ally", (void*)monster_human_grunt_ally },
+	{ "monster_grunt_ally_repel", (void*)monster_grunt_ally_repel },
+	{ "monster_medic_ally_repel", (void*)monster_medic_ally_repel },
+	{ "monster_torch_ally_repel", (void*)monster_torch_ally_repel },
+	{ "monster_human_grunt_ally_dead", (void*)monster_human_grunt_ally_dead },
+	{ "monster_human_torch_ally", (void*)monster_human_torch_ally },
+	{ "monster_human_medic_ally", (void*)monster_human_medic_ally },
+	{ "func_tank_of", (void*)func_tank_of },
+	{ "func_tanklaser_of", (void*)func_tanklaser_of },
+	{ "func_tankrocket_of", (void*)func_tankrocket_of },
+	{ "func_tankmortar_of", (void*)func_tankmortar_of },
+	{ "func_tankcontrols_of", (void*)func_tankcontrols_of },
+	{ "pitworm_gib", (void*)pitworm_gib },
+	{ "pitworm_gibshooter", (void*)pitworm_gibshooter },
+	{ "env_blowercannon", (void*)env_blowercannon },
+	{ "trigger_xen_return", (void*)trigger_xen_return },
+	{ "trigger_geneworm_hit", (void*)trigger_geneworm_hit },
+	{ "trigger_playerfreeze", (void*)trigger_playerfreeze },
+	{ "item_generic", (void*)item_generic },
+	{ "env_genewormcloud", (void*)env_genewormcloud },
+	{ "env_genewormspawn", (void*)env_genewormspawn },
+	{ "monster_geneworm", (void*)monster_geneworm },
+	{ "monster_gonome", (void*)monster_gonome },
+	{ "monster_gonome_dead", (void*)monster_gonome_dead },
+	{ "weapon_grapple", (void*)weapon_grapple },
+	{ "grapple_tip", (void*)grapple_tip },
+	{ "monster_houndeye_dead", (void*)monster_houndeye_dead },
+	{ "monster_alien_slave_dead", (void*)monster_alien_slave_dead },
+	{ "weapon_knife", (void*)weapon_knife },
+	{ "monster_op4loader", (void*)monster_op4loader },
+	{ "weapon_m249", (void*)weapon_m249 },
+	{ "ammo_556", (void*)ammo_556 },
+	{ "monster_male_assassin", (void*)monster_male_assassin },
+	{ "monster_assassin_repel", (void*)monster_assassin_repel },
+	{ "monster_massassin_dead", (void*)monster_massassin_dead },
+	{ "item_nuclearbombtimer", (void*)item_nuclearbombtimer },
+	{ "item_nuclearbombbutton", (void*)item_nuclearbombbutton },
+	{ "item_nuclearbomb", (void*)item_nuclearbomb },
+	//{ "mortar_shell", (void*)mortar_shell },
+	//{ "op4mortar", (void*)op4mortar },
+	//{ "func_op4mortarcontroller", (void*)func_op4mortarcontroller },
+	{ "monster_otis", (void*)monster_otis },
+	{ "monster_otis_dead", (void*)monster_otis_dead },
+	{ "monster_penguin", (void*)monster_penguin },
+	{ "weapon_penguin", (void*)weapon_penguin },
+	{ "weapon_pipewrench", (void*)weapon_pipewrench },
+	{ "pitdronespike", (void*)pitdronespike },
+	{ "monster_pitdrone", (void*)monster_pitdrone },
+	{ "monster_pitworm", (void*)monster_pitworm },
+	{ "monster_pitworm_up", (void*)monster_pitworm_up },
+	{ "info_pitworm_steam_lock", (void*)info_pitworm_steam_lock },
+	{ "monster_recruit", (void*)monster_recruit },
+	{ "env_rope", (void*)env_rope },
+	{ "rope_sample", (void*)rope_sample },
+	{ "rope_segment", (void*)rope_segment },
+	{ "env_electrified_wire", (void*)env_electrified_wire },
+	{ "shock_beam", (void*)shock_beam },
+	{ "weapon_shockrifle", (void*)weapon_shockrifle },
+	{ "monster_shockroach", (void*)monster_shockroach },
+	{ "monster_skeleton_dead", (void*)monster_skeleton_dead },
+	{ "weapon_sniperrifle", (void*)weapon_sniperrifle },
+	{ "ammo_762", (void*)ammo_762 },
+	{ "spore", (void*)spore },
+	{ "weapon_sporelauncher", (void*)weapon_sporelauncher },
+	{ "ammo_spore", (void*)ammo_spore },
+	{ "monster_shocktrooper", (void*)monster_shocktrooper },
+	{ "voltigore_energy_ball", (void*)voltigore_energy_ball },
+	{ "monster_alien_voltigore", (void*)monster_alien_voltigore },
+	{ "monster_alien_babyvoltigore", (void*)monster_alien_babyvoltigore },
+	{ "monster_zombie_barney", (void*)monster_zombie_barney },
+	{ "monster_zombie_soldier", (void*)monster_zombie_soldier },
+	{ "monster_zombie_soldier_dead", (void*)monster_zombie_soldier_dead },
 	{ NULL, NULL },
 };
 
