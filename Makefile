@@ -1,4 +1,7 @@
-all:
+all: libserver.a libclient.a
+	@mkdir -p lib
+	@mv cl_dll/libclient.a lib/
+	@mv dlls/libserver.a lib/
 
 libserver.a:
 	$(MAKE) -C dlls

@@ -68,7 +68,7 @@ SRCS+=./MOTD.cpp
 
 OBJS = $(SRCS:.cpp=.o) $(SRCS_C:.c=.o)
 
-PREFIX    = arm-none-eabi
+PREFIX    = $(DEVKITARM)/bin/arm-none-eabi
 CC        = $(PREFIX)-gcc
 CXX       = $(PREFIX)-g++
 AR        = $(PREFIX)-ar
