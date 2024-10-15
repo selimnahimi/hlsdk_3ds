@@ -28,7 +28,9 @@
 
 #pragma warning(disable: 4244)
 
-extern "C" int		iJumpSpectator;
+// todo: investigate why extern doesnt compile
+// extern "C" int		iJumpSpectator;
+int		iJumpSpectator;
 extern "C" float	vJumpOrigin[3];
 extern "C" float	vJumpAngles[3]; 
 

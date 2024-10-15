@@ -381,7 +381,7 @@ bool isXashFWGS()
 	return gMobileEngfuncs != NULL;
 }
 
-#ifdef _3DS
+#ifdef __3DS__
 
 //===============================
 // exports for 3ds dlsym()

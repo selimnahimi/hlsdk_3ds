@@ -21,7 +21,7 @@
 
 // HACK: this enables us to have two different symbols for this shit in
 // server and client static libs, eliminating linking conflicts without effort
-#ifdef _3DS
+#ifdef __3DS__
 #ifdef CLIENT_DLL
 #define gpGlobals cl_gpGlobals
 #define g_engfuncs g_cl_engfuncs

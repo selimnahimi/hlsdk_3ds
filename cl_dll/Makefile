@@ -1,3 +1,8 @@
+PREFIX    = $(DEVKITARM)/bin/arm-none-eabi
+CC        = $(PREFIX)-gcc
+CXX       = $(PREFIX)-g++
+AR        = $(PREFIX)-ar
+
 SRCS=../dlls/crossbow.cpp
 SRCS+=../dlls/crowbar.cpp
 SRCS+=../dlls/egon.cpp
@@ -68,15 +73,10 @@ SRCS+=./MOTD.cpp
 
 OBJS = $(SRCS:.cpp=.o) $(SRCS_C:.c=.o)
 
-PREFIX    = $(DEVKITARM)/bin/arm-none-eabi
-CC        = $(PREFIX)-gcc
-CXX       = $(PREFIX)-g++
-AR        = $(PREFIX)-ar
-
 INCLUDES = -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../utils/false_vgui/include -include "classhacks.h"
-DEFINES = -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -D_3DS
-CFLAGS =  -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -Wl,-q -Wfatal-errors -Wno-write-strings -fsigned-char -fno-short-enums  $(DEFINES) $(INCLUDES)
-CXXFLAGS = $(CFLAGS) -fno-exceptions -std=c++11 -fpermissive -static-libstdc++ -static-libgcc
+DEFINES = -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DCLIENT_WEAPONS -DCLIENT_DLL -D__3DS__
+CFLAGS =  -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -Wl,-q -Wfatal-errors -Wno-write-strings -fsigned-char -fno-short-enums -ffunction-sections -fdata-sections  $(DEFINES) $(INCLUDES)
+CXXFLAGS = $(CFLAGS) -fno-exceptions -std=gnu++11 -fno-threadsafe-statics -fpermissive -static-libstdc++ -static-libgcc
 ASFLAGS = $(CFLAGS)
 
 all: libclient.a

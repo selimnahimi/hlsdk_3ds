@@ -53,7 +53,7 @@ typedef unsigned char byte;
 // why is this fucking header file so weird
 // how is this good coding standards gaben
 // go die in a fire
-#ifdef _3DS
+#ifdef __3DS__
 #ifdef CLIENT_DLL
 #define gpGlobals cl_gpGlobals
 #define g_engfuncs g_cl_engfuncs

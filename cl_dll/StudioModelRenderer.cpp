@@ -39,7 +39,7 @@ engine_studio_api_t IEngineStudio;
 #define LEGS_BONES_COUNT	8
 
 // enumerate all the bones that used for gait animation
-#ifdef _3DS
+#ifdef __3DS__
 extern "C" const char *legs_bones[8];
 #else
 const char *legs_bones[] =

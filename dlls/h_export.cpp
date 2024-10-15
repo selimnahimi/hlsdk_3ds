@@ -56,7 +56,7 @@ extern "C" void DLLEXPORT EXPORT2 GiveFnptrsToDll( enginefuncs_t *pengfuncsFromE
 	gpGlobals = pGlobals;
 }
 
-#ifdef _3DS
+#ifdef __3DS__
 
 //===============================
 // exports for 3ds dlsym()

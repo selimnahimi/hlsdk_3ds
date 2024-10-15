@@ -108,7 +108,7 @@ OBJS = \
 	../pm_shared/pm_shared.o 
 
 INCLUDES = -I. -I../engine -I../common -I../pm_shared -I../game_shared
-DEFINES = -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DCLIENT_WEAPONS -DNO_VOICEGAMEMGR -D_3DS
+DEFINES = -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DCLIENT_WEAPONS -DNO_VOICEGAMEMGR -D__3DS__
 CFLAGS =  -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft -O2 -Wl,-q -Wfatal-errors -Wno-write-strings -fsigned-char -fno-short-enums -ffunction-sections -fdata-sections $(DEFINES) $(INCLUDES)
 CXXFLAGS = $(CFLAGS) -fno-exceptions -std=gnu++11 -fno-threadsafe-statics -fpermissive -static-libstdc++ -static-libgcc -Wno-invalid-offsetof
 ASFLAGS = $(CFLAGS)
