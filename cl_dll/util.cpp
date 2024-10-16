@@ -30,106 +30,57 @@
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-extern vec3_t vec3_origin;
+//vec3_t vec3_origin( 0, 0, 0 );
 
-#ifdef _MSC_VER
-vec3_t vec3_origin;
-#endif
+//double sqrt(double x);
 
-double sqrt( double x );
-
-float Length( const float *v )
+float rsqrt( float number )
 {
 	int	i;
-	float	length;
+	float	x, y;
 
-	length = 0;
-	for( i = 0; i < 3; i++ )
-		length += v[i] * v[i];
-	length = sqrt( length );		// FIXME
+	if( number == 0.0f )
+		return 0.0f;
 
-	return length;
+	x = number * 0.5f;
+	i = *(int *)&number;	// evil floating point bit level hacking
+	i = 0x5f3759df - (i >> 1);	// what the fuck?
+	y = *(float *)&i;
+	y = y * (1.5f - (x * y * y));	// first iteration
+
+	return y;
 }
 
-void VectorAngles( const float *forward, float *angles )
+int HUD_GetSpriteIndexByName( const char *sz )
 {
-	float tmp, yaw, pitch;
+	return gHUD.GetSpriteIndex(sz);
+}
 
-	if( forward[1] == 0 && forward[0] == 0 )
+HSPRITE HUD_GetSprite( int index )
+{
+	return gHUD.GetSprite(index);
+}
+
+wrect_t HUD_GetSpriteRect( int index )
+{
+	return gHUD.GetSpriteRect( index );
+}
+
+vec3_t g_ColorBlue	= { 0.6, 0.8, 1.0 };
+vec3_t g_ColorRed	= { 1.0, 0.25, 0.25 };
+vec3_t g_ColorGreen	= { 0.6, 1.0, 0.6 };
+vec3_t g_ColorYellow= { 1.0, 0.7, 0.0 };
+vec3_t g_ColorGrey	= { 0.8, 0.8, 0.8 };
+
+float *GetClientColor( int clientIndex )
+{
+	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
 	{
-		yaw = 0;
-		if( forward[2] > 0 )
-			pitch = 90;
-		else
-			pitch = 270;
+	case TEAM_TERRORIST:  return g_ColorRed;
+	case TEAM_CT:         return g_ColorBlue;
+	case TEAM_SPECTATOR:
+	case TEAM_UNASSIGNED: return g_ColorYellow;
+	case 4:               return g_ColorGreen;
+	default:              return g_ColorGrey;
 	}
-	else
-	{
-		yaw = ( atan2( forward[1], forward[0]) * 180 / M_PI );
-		if( yaw < 0 )
-			yaw += 360;
-
-		tmp = sqrt( forward[0] * forward[0] + forward[1] * forward[1] );
-		pitch = ( atan2( forward[2], tmp ) * 180 / M_PI );
-		if( pitch < 0 )
-			pitch += 360;
-	}
-
-	angles[0] = pitch;
-	angles[1] = yaw;
-	angles[2] = 0;
-}
-
-float VectorNormalize( float *v )
-{
-	float length, ilength;
-
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt( length );		// FIXME
-
-	if( length )
-	{
-		ilength = 1 / length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-
-	return length;
-}
-
-void VectorInverse( float *v )
-{
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
-}
-
-void VectorScale( const float *in, float scale, float *out )
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
-}
-
-void VectorMA( const float *veca, float scale, const float *vecb, float *vecc )
-{
-	vecc[0] = veca[0] + scale * vecb[0];
-	vecc[1] = veca[1] + scale * vecb[1];
-	vecc[2] = veca[2] + scale * vecb[2];
-}
-
-HSPRITE LoadSprite( const char *pszName )
-{
-	int i;
-	char sz[256];
-
-	if( ScreenWidth < 640 )
-		i = 320;
-	else
-		i = 640;
-
-	sprintf( sz, pszName, i );
-
-	return SPR_Load( sz );
 }

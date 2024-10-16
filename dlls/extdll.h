@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -12,7 +12,6 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#pragma once
 #ifndef EXTDLL_H
 #define EXTDLL_H
 
@@ -25,14 +24,16 @@
 #define DEBUG 1
 #endif
 
-// Silence certain warnings
 #ifdef _MSC_VER
+// Silence certain warnings
 #pragma warning(disable : 4244)		// int or float down-conversion
 #pragma warning(disable : 4305)		// int or float data truncation
 #pragma warning(disable : 4201)		// nameless struct/union
 #pragma warning(disable : 4514)		// unreferenced inline function removed
 #pragma warning(disable : 4100)		// unreferenced formal parameter
 #endif
+
+#include "archtypes.h"     // DAL
 
 // Prevent tons of unused windows definitions
 #ifdef _WIN32
@@ -41,17 +42,8 @@
 #define NOSERVICE
 #define NOMCX
 #define NOIME
-#define HSPRITE HSPRITE_win32
 #include "windows.h"
-#undef HSPRITE
 #else // _WIN32
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE (!FALSE)
-#endif
-typedef unsigned int ULONG;
 typedef unsigned char BYTE;
 typedef int BOOL;
 #ifdef __3DS__
@@ -60,6 +52,9 @@ typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #include <limits.h>
 #include <stdarg.h>
+#include <string.h> // memset 
+
+#define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
 #endif //_WIN32
 
 // Misc C-runtime library headers
@@ -67,13 +62,16 @@ typedef int BOOL;
 #include "stdlib.h"
 #include "math.h"
 
-#if defined(__LP64__) || defined(__LLP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__) ) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-  #define XASH_64BIT
+#ifndef min
+#define min(a,b)  (((a) < (b)) ? (a) : (b))
+#endif
+#ifndef max
+#define max(a,b)  (((a) > (b)) ? (a) : (b))
 #endif
 
 // Header file containing definition of globalvars_t and entvars_t
-typedef unsigned int func_t;
-typedef int string_t;				// from engine's pr_comp.h;
+//typedef unsigned int func_t;					//
+//typedef unsigned int string_t;				// from engine's pr_comp.h;
 typedef float vec_t;				// needed before including progdefs.h
 
 // Vector class
@@ -92,11 +90,5 @@ typedef float vec_t;				// needed before including progdefs.h
 
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"
-#ifndef Q_min
-#define Q_min(a,b)  (((a) < (b)) ? (a) : (b))
-#endif
-#ifndef Q_max
-#define Q_max(a,b)  (((a) > (b)) ? (a) : (b))
-#endif
 
 #endif //EXTDLL_H

@@ -1,15 +1,11 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================
-
-#ifndef BITVEC_H
+#if !defined(BITVEC_H)
 #define BITVEC_H
-#ifdef _WIN32
-#pragma once
-#endif
 
 #include <assert.h>
 #include <string.h>

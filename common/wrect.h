@@ -12,13 +12,30 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#pragma once
-#ifndef WRECT_H
-#define WRECT_H
 
-typedef struct wrect_s
+#pragma once
+
+#if !defined( WRECTH )
+#define WRECTH
+
+typedef struct rect_s
 {
-	int	left, right, top, bottom;
+	int	left;
+	int right;
+	int top;
+	int bottom;
+
+#ifdef __cplusplus
+	int Width()
+	{
+		return right - left;
+	}
+
+	int Height()
+	{
+		return bottom - top;
+	}
+#endif
 } wrect_t;
 
-#endif//WRECT_H
+#endif

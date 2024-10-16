@@ -12,7 +12,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
-#pragma once
+
 #ifndef LIGHTSTYLE_H
 #define LIGHTSTYLE_H
 
@@ -23,7 +23,7 @@ typedef struct
 	int		length;
 	float		value;
 	qboolean		interp;		// allow to interpolate this lightstyle
-	float		time;		// local time is gurantee what new style begins from the start, not mid or end of the sequence
+	float		time;		// local time warranties that new style begins from the start, not mid or end of the sequence
 } lightstyle_t;
 
 #endif//LIGHTSTYLE_H

@@ -21,38 +21,27 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
-#include "parsemsg.h"
+#include "pmtrace.h"
 
-#if defined(GOLDSOURCE_SUPPORT) && (defined(_WIN32) || defined(__linux__) || defined(__APPLE__)) && (defined(__i386) || defined(_M_IX86))
-#define USE_VGUI_FOR_GOLDSOURCE_SUPPORT
-#include "VGUI_Panel.h"
-#include "VGUI_App.h"
-#endif
-
-extern "C"
-{
 #include "pm_shared.h"
-}
 
 #include <string.h>
+#include "interface.h" // not used here
+#include "render_api.h"
+#include "mobility_int.h"
+#include "vgui_parser.h"
 
-cl_enginefunc_t gEngfuncs;
+cl_enginefunc_t		gEngfuncs  = { };
+render_api_t		gRenderAPI = { };
+mobile_engfuncs_t	gMobileAPI = { };
 CHud gHUD;
-mobile_engfuncs_t *gMobileEngfuncs = NULL;
+int g_iXash = 0; // indicates a buildnum
+int g_iMobileAPIVersion = 0;
 
-extern "C" int g_bhopcap;
-void InitInput( void );
-void EV_HookEvents( void );
+void InitInput (void);
+void Game_HookEvents( void );
 void IN_Commands( void );
-
-int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
-{
-	BEGIN_READ( pbuf, iSize );
-
-	g_bhopcap = READ_BYTE();
-
-	return 1;
-}
+void Input_Shutdown (void);
 
 /*
 ========================== 
@@ -61,24 +50,34 @@ int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
 Called when the DLL is first loaded.
 ==========================
 */
-extern "C" 
+int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
-int		DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int		DLLEXPORT HUD_VidInit( void );
-void	DLLEXPORT HUD_Init( void );
-int		DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int		DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	DLLEXPORT HUD_Reset ( void );
-void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int		DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	DLLEXPORT HUD_Frame( double time );
-void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-void	DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
+	if (iVersion != CLDLL_INTERFACE_VERSION)
+		return 0;
+
+	gEngfuncs = *pEnginefuncs;
+
+	sscanf( CVAR_GET_STRING( "host_ver" ), "%d", &g_iXash );
+
+	Game_HookEvents();
+
+	return 1;
 }
+
+
+/*
+=============
+HUD_Shutdown
+
+=============
+*/
+void DLLEXPORT HUD_Shutdown( void )
+{
+	gHUD.Shutdown();
+	Input_Shutdown();
+	Localize_Free();
+}
+
 
 /*
 ================================
@@ -91,21 +90,21 @@ int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
 	int iret = 0;
 
-	switch( hullnumber )
+	switch ( hullnumber )
 	{
 	case 0:				// Normal player
-		Vector( -16, -16, -36 ).CopyToArray(mins);
-		Vector( 16, 16, 36 ).CopyToArray(maxs);
+		Vector(-16, -16, -36).CopyToArray(mins);
+		Vector(16, 16, 36).CopyToArray(maxs);
 		iret = 1;
 		break;
 	case 1:				// Crouched player
-		Vector( -16, -16, -18 ).CopyToArray(mins);
-		Vector( 16, 16, 18 ).CopyToArray(maxs);
+		Vector(-16, -16, -18).CopyToArray(mins);
+		Vector(16, 16, 18).CopyToArray(maxs);
 		iret = 1;
 		break;
 	case 2:				// Point based hull
-		Vector( 0, 0, 0 ).CopyToArray(mins);
-		Vector( 0, 0, 0 ).CopyToArray(maxs);
+		Vector(0, 0, 0).CopyToArray(mins);
+		Vector(0, 0, 0).CopyToArray(maxs);
 		iret = 1;
 		break;
 	}
@@ -121,10 +120,10 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
 	// Parse stuff from args
-	int max_buffer_size = *response_buffer_size;
+	// int max_buffer_size = *response_buffer_size;
 
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer
@@ -150,20 +149,7 @@ void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
-{
-	gEngfuncs = *pEnginefuncs;
-
-	if( iVersion != CLDLL_INTERFACE_VERSION )
-		return 0;
-
-	memcpy( &gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t) );
-
-	EV_HookEvents();
-
-	return 1;
-}
-
+#ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 /*
 =================
 HUD_GetRect
@@ -182,45 +168,6 @@ int *HUD_GetRect( void )
 
 	return extent;
 }
-
-#ifdef USE_VGUI_FOR_GOLDSOURCE_SUPPORT
-class TeamFortressViewport : public vgui::Panel
-{
-public:
-	TeamFortressViewport(int x,int y,int wide,int tall);
-	void Initialize( void );
-
-	virtual void paintBackground();
-	void *operator new( size_t stAllocateBlock );
-};
-
-static TeamFortressViewport* gViewPort = NULL;
-
-TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
-{
-	gViewPort = this;
-	Initialize();
-}
-
-void TeamFortressViewport::Initialize()
-{
-	//vgui::App::getInstance()->setCursorOveride( vgui::App::getInstance()->getScheme()->getCursor(vgui::Scheme::scu_none) );
-}
-
-void TeamFortressViewport::paintBackground()
-{
-//	int wide, tall;
-//	getParent()->getSize( wide, tall );
-//	setSize( wide, tall );
-	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
-}
-
-void *TeamFortressViewport::operator new( size_t stAllocateBlock )
-{
-	void *mem = ::operator new( stAllocateBlock );
-	memset( mem, 0, stAllocateBlock );
-	return mem;
-}
 #endif
 
 /*
@@ -233,28 +180,16 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
+bool isLoaded = false;
+
 int DLLEXPORT HUD_VidInit( void )
 {
 	gHUD.VidInit();
-#ifdef USE_VGUI_FOR_GOLDSOURCE_SUPPORT
-	vgui::Panel* root=(vgui::Panel*)gEngfuncs.VGui_GetPanel();
-	if (root) {
-		gEngfuncs.Con_Printf( "Root VGUI panel exists\n" );
-		root->setBgColor(128,128,0,0);
 
-		if (gViewPort != NULL)
-		{
-			gViewPort->Initialize();
-		}
-		else
-		{
-			gViewPort = new TeamFortressViewport(0,0,root->getWide(),root->getTall());
-			gViewPort->setParent(root);
-		}
-	} else {
-		gEngfuncs.Con_Printf( "Root VGUI panel does not exist\n" );
-	}
-#endif
+	isLoaded = true;
+
+	//VGui_Startup();
+
 	return 1;
 }
 
@@ -272,9 +207,9 @@ void DLLEXPORT HUD_Init( void )
 {
 	InitInput();
 	gHUD.Init();
-
-	gEngfuncs.pfnHookUserMsg( "Bhopcap", __MsgFunc_Bhopcap );
+	//Scheme_Init();
 }
+
 
 /*
 ==========================
@@ -292,6 +227,7 @@ int DLLEXPORT HUD_Redraw( float time, int intermission )
 	return 1;
 }
 
+
 /*
 ==========================
 	HUD_UpdateClientData
@@ -305,11 +241,11 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData( client_data_t *pcldata, float flTime )
+int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
 	IN_Commands();
 
-	return gHUD.UpdateClientData( pcldata, flTime );
+	return gHUD.UpdateClientData(pcldata, flTime );
 }
 
 /*
@@ -335,13 +271,11 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
-#ifdef USE_VGUI_FOR_GOLDSOURCE_SUPPORT
-	if (!gViewPort)
-		gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
-#else
+#ifdef _CS16CLIENT_ENABLE_GSRC_SUPPORT
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
 }
+
 
 /*
 ==========================
@@ -351,9 +285,9 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus( int entindex, qboolean bTalking )
+void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
-
+	gHUD.m_Radio.Voice( entindex, bTalking );
 }
 
 /*
@@ -369,17 +303,212 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
+/*
+==========================
+HUD_GetRenderInterface
+
+Called when Xash3D sends render api to us
+==========================
+*/
+
+int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
 {
-	if( gpMobileEngfuncs->version != MOBILITY_API_VERSION )
-		return;
-	gMobileEngfuncs = gpMobileEngfuncs;
+	if( version != CL_RENDER_INTERFACE_VERSION )
+		return false;
+
+	gRenderAPI = *renderfuncs;
+
+	// we didn't send callbacks to engine, because we don't use it
+	// *callback = renderInterface;
+
+	// we have here a Host_Error, so check Xash for version
+	if( g_iXash < MIN_XASH_VERSION )
+	{
+		gRenderAPI.Host_Error("Xash3D version check failed!\nPlease update your Xash3D!\n");
+	}
+
+	return true;
 }
 
-bool isXashFWGS()
+/*
+========================
+HUD_MobilityInterface
+========================
+*/
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *mobileapi )
 {
-	return gMobileEngfuncs != NULL;
+	if( mobileapi->version != MOBILITY_API_VERSION )
+	{
+		gEngfuncs.Con_Printf("Client Error: Mobile API version mismatch. Got: %i, want: %i\n",
+			mobileapi->version, MOBILITY_API_VERSION);
+
+		gRenderAPI.Host_Error("Xash3D Android version check failed!\nPlease update your Xash3D Android!\n");
+		return 1;
+	}
+
+	g_iMobileAPIVersion = MOBILITY_API_VERSION;
+	gMobileAPI = *mobileapi;
+
+#define TOUCH_ADDDEFAULT (*gMobileAPI.pfnTouchAddDefaultButton)
+
+	gMobileAPI.pfnTouchResetDefaultButtons();
+	unsigned char color[] = { 255, 255, 255, 150 };
+	TOUCH_ADDDEFAULT( "move", "", "_move", 0.000000, 0.444444, 0.460000, 0.995556, color, 0, 0.673353, 0 );
+	TOUCH_ADDDEFAULT( "look", "", "_look", 0.470000, 0.248889, 1.000000, 0.604444, color, 0, 0.377044, 0 );
+	TOUCH_ADDDEFAULT( "joy", "touch/gfx/joy", "_joy", 0.290000, 0.187234, 0.410000, 0.400745, color, 0, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "dpad", "touch/gfx/dpad", "_dpad", 0.170000, 0.187234, 0.290000, 0.400745, color, 0, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "invprev", "touch/gfx/left", "invprev", 0.000000, 0.323404, 0.080000, 0.465745, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "invnext", "touch/gfx/right", "invnext", 0.080000, 0.323404, 0.160000, 0.465745, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "reload", "touch/gfx/reload", "+reload", 0.680000, 0.680851, 0.760000, 0.823192, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "use", "touch/gfx/use", "+use", 0.700000, 0.544681, 0.780000, 0.687022, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "spraypaint", "touch/gfx/spraypaint", "impulse 201", 0.700000, 0.817021, 0.780000, 0.959362, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "drop", "touch/gfx/drop", "drop", 0.780000, 0.868085, 0.860000, 1.010426, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "jump", "touch/gfx/jump", "+jump", 0.880000, 0.800000, 0.980000, 0.977926, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "attack", "touch/gfx/attack", "+attack", 0.760000, 0.612766, 0.910000, 0.879655, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "attack2", "touch/gfx/attack2", "+attack2", 0.900000, 0.578723, 1.000000, 0.756649, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w5", "touch/gfx/w_c4", "slot5", 0.760000, 0.102128, 0.840000, 0.244469, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w1", "touch/gfx/w_rifle", "slot1", 0.780000, 0.238298, 0.860000, 0.380639, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w2", "touch/gfx/w_pistol", "slot2", 0.840000, 0.136170, 0.920000, 0.278511, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w4", "touch/gfx/w_grenade", "slot4", 0.880000, 0.017021, 0.960000, 0.159362, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "w3", "touch/gfx/w_knife", "slot3", 0.920000, 0.136170, 1.000000, 0.278511, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "flight", "touch/gfx/flaghtlight", "impulse 100", 0.280000, 0.851064, 0.360000, 0.993405, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "light", "touch/gfx/light", "toggle_light", 0.360000, 0.851064, 0.440000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "buy", "touch/gfx/buy", "buy", 0.440000, 0.851064, 0.520000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "score", "touch/gfx/score", "scoreboard", 0.520000, 0.851064, 0.600000, 0.993405, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "nightvision", "touch/gfx/nightvision", "nightvision;toggle_plusminus", 0.360000, 0.714894, 0.440000, 0.857235, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "minus_nvg", "touch/gfx/minus", "nvgadjustdown", 0.340000, 0.629787, 0.400000, 0.736543, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "plus_nvg", "touch/gfx/plus", "nvgadjustup", 0.400000, 0.629787, 0.460000, 0.736543, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "numbers", "touch_default/show_weapons", "exec touch_default/numbers.cfg", 0.440000, 0.714894, 0.520000, 0.857235, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "duck", "touch/gfx/duck", "+duck", 0.000000, 0.817021, 0.100000, 0.994947, color, 2, 1.000000, 512 );
+	TOUCH_ADDDEFAULT( "duck_sw", "touch/gfx/duck", "crouchtoggle", 0.100000, 0.817021, 0.200000, 0.994947, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "change_team", "touch/gfx/change_team", "chooseteam", 0.540000, 0.000000, 0.620000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "exit", "touch/gfx/exit", "cancelselect", 0.460000, 0.000000, 0.540000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "touch_edit", "touch/gfx/settings", "touch_enableedit", 0.380000, 0.000000, 0.460000, 0.142341, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "cmd", "touch/gfx/cmdmenu", "exec touch/cmd/cmd", 0.100000, 0.248889, 0.200000, 0.426815, color, 2, 1.000000, 1 );
+	TOUCH_ADDDEFAULT( "radio", "touch/gfx/radio", "showvguimenu 38", 0.000000, 0.248889, 0.100000, 0.426815, color, 2, 1.000000, 0 );
+	TOUCH_ADDDEFAULT( "walk", "touch/gfx/walk", "+speed", 0.000000, 0.640000, 0.100000, 0.817926, color, 2, 1.000000, 0 );
+
+	return 0;
 }
+
+extern "C" void DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
+{
+	*x = *y = 0;
+}
+
+extern "C" int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
+{
+	if ( iplayer <= MAX_PLAYERS )
+		return g_PlayerExtraInfo[iplayer].teamnumber;
+	return 0;
+}
+
+#include "APIProxy.h"
+
+cldll_func_dst_t *g_pcldstAddrs;
+
+extern "C" void DLLEXPORT F(void *pv)
+{
+	cldll_func_t *pcldll_func = (cldll_func_t *)pv;
+
+	// Hack!
+	g_pcldstAddrs = ((cldll_func_dst_t *)pcldll_func->pHudVidInitFunc);
+
+	cldll_func_t cldll_func =
+	{
+	Initialize,
+	HUD_Init,
+	HUD_VidInit,
+	HUD_Redraw,
+	HUD_UpdateClientData,
+	HUD_Reset,
+	HUD_PlayerMove,
+	HUD_PlayerMoveInit,
+	HUD_PlayerMoveTexture,
+	IN_ActivateMouse,
+	IN_DeactivateMouse,
+	IN_MouseEvent,
+	IN_ClearStates,
+	IN_Accumulate,
+	CL_CreateMove,
+	CL_IsThirdPerson,
+	CL_CameraOffset,
+	KB_Find,
+	CAM_Think,
+	V_CalcRefdef,
+	HUD_AddEntity,
+	HUD_CreateEntities,
+	HUD_DrawNormalTriangles,
+	HUD_DrawTransparentTriangles,
+	HUD_StudioEvent,
+	HUD_PostRunCmd,
+	HUD_Shutdown,
+	HUD_TxferLocalOverrides,
+	HUD_ProcessPlayerState,
+	HUD_TxferPredictionData,
+	Demo_ReadBuffer,
+	HUD_ConnectionlessPacket,
+	HUD_GetHullBounds,
+	HUD_Frame,
+	HUD_Key_Event,
+	HUD_TempEntUpdate,
+	HUD_GetUserEntity,
+	HUD_VoiceStatus,
+	HUD_DirectorMessage,
+	HUD_GetStudioModelInterface,
+	HUD_ChatInputPosition,
+	HUD_GetPlayerTeam,
+	NULL
+	};
+
+	*pcldll_func = cldll_func;
+}
+
+#include "cl_dll/IGameClientExports.h"
+
+//-----------------------------------------------------------------------------
+// Purpose: Exports functions that are used by the gameUI for UI dialogs
+//-----------------------------------------------------------------------------
+class CClientExports : public IGameClientExports
+{
+public:
+	// returns the name of the server the user is connected to, if any
+	virtual const char *GetServerHostName()
+	{
+		return gHUD.m_szServerName;
+	}
+
+	// ingame voice manipulation
+	virtual bool IsPlayerGameVoiceMuted(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+			return GetClientVoiceMgr()->IsPlayerBlocked(playerIndex);*/
+		return false;
+	}
+
+	virtual void MutePlayerGameVoice(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, true);
+		}*/
+	}
+
+	virtual void UnmutePlayerGameVoice(int playerIndex)
+	{
+		/*if (GetClientVoiceMgr())
+		{
+			GetClientVoiceMgr()->SetPlayerBlockedState(playerIndex, false);
+		}*/
+	}
+
+	virtual const char *Localize( const char *string )
+	{
+		return ::Localize( string );
+	}
+};
+
+EXPOSE_SINGLE_INTERFACE(CClientExports, IGameClientExports, GAMECLIENTEXPORTS_INTERFACE_VERSION)
 
 #ifdef __3DS__
 
@@ -390,33 +519,33 @@ bool isXashFWGS()
 // for some reason these weren't in the exports block above
 extern "C"
 {
-void DLLEXPORT HUD_Shutdown( void );
-void DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
-int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding );
-int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
-void DLLEXPORT HUD_CreateEntities( void );
-void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
-void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
-void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
-void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
-int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio );
-void DLLEXPORT HUD_DrawNormalTriangles( void );
-void DLLEXPORT HUD_DrawTransparentTriangles( void );
-cl_entity_t DLLEXPORT *HUD_GetUserEntity( int index );
-void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
-void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active );
-struct kbutton_s DLLEXPORT *KB_Find( const char *name );
-void DLLEXPORT CAM_Think( void );
-int DLLEXPORT CL_IsThirdPerson( void );
-void DLLEXPORT CL_CameraOffset( float *ofs );
+// void DLLEXPORT HUD_Shutdown( void );
+// void DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed );
+// int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding );
+// int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
+// void DLLEXPORT HUD_CreateEntities( void );
+// void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+// void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
+// void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
+// void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
+// void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
+// int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio );
+// void DLLEXPORT HUD_DrawNormalTriangles( void );
+// void DLLEXPORT HUD_DrawTransparentTriangles( void );
+// cl_entity_t DLLEXPORT *HUD_GetUserEntity( int index );
+// void DLLEXPORT Demo_ReadBuffer( int size, unsigned char *buffer );
+// void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active );
+// struct kbutton_s DLLEXPORT *KB_Find( const char *name );
+// void DLLEXPORT CAM_Think( void );
+// int DLLEXPORT CL_IsThirdPerson( void );
+// void DLLEXPORT CL_CameraOffset( float *ofs );
 void DLLEXPORT IN_ClientMoveEvent( float forwardmove, float sidemove );
 void DLLEXPORT IN_ClientLookEvent( float relyaw, float relpitch );
 void DLLEXPORT IN_MouseEvent_CL( int mstate );
-void DLLEXPORT IN_ClearStates( void );
+// void DLLEXPORT IN_ClearStates( void );
 void DLLEXPORT IN_ActivateMouse_CL( void );
 void DLLEXPORT IN_DeactivateMouse_CL( void );
-void DLLEXPORT IN_Accumulate( void );
+// void DLLEXPORT IN_Accumulate( void );
 void DLLEXPORT V_CalcRefdef_CL( struct ref_params_s *pparams );
 
 typedef struct dllexport_s
